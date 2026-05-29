@@ -28,6 +28,6 @@ Seçilen `.mat` dosyalarındaki `ImgPol` değişkeninin birinci polarizasyon kan
 
 `ship_sea` klasöründeki ilk SAR gemi/deniz örnekleri için Kaggle üzerinde bulunan SARscope: Synthetic Aperture Radar Maritime Images veri seti kullanılmıştır.
 
-Bu veri seti HRSID ve OPEN-SSDD kaynaklarından işlenmiş SAR gemi görüntülerini içermektedir. Projede ilk aşamada yalnızca `.jpg` görüntü dosyaları kullanılmış, `_annotations.coco.json` etiket dosyası temiz görüntü veri klasörüne dahil edilmemiştir.
+Bu veri seti HRSID ve OPEN-SSDD kaynaklarından işlenmiş SAR gemi görüntülerini içermektedir. Projede ilk aşamada yalnızca `.jpg` görüntü dosyaları kullanılmış, `_annotations.coco.json` etiket dosyası temiz görüntü veri klasörüne dahil edilmemiştir.  
 
-Seçilen görüntüler `data/clean/europe/ship_sea` klasörüne eklenmiştir.
+Seçilen görüntüler `data/clean/europe/ship_sea` klasörüne eklenmiştir. 
