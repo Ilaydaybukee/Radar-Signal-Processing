@@ -31,3 +31,11 @@ Seçilen `.mat` dosyalarındaki `ImgPol` değişkeninin birinci polarizasyon kan
 Bu veri seti HRSID ve OPEN-SSDD kaynaklarından işlenmiş SAR gemi görüntülerini içermektedir. Projede ilk aşamada yalnızca `.jpg` görüntü dosyaları kullanılmış, `_annotations.coco.json` etiket dosyası temiz görüntü veri klasörüne dahil edilmemiştir.  
 
 Seçilen görüntüler `data/clean/europe/ship_sea` klasörüne eklenmiştir. 
+
+### Sentinel-1&2 Image Pairs Urban Samples
+
+`urban` klasöründeki SAR şehir/bina dokusu örnekleri için Kaggle üzerinde bulunan Sentinel-1&2 Image Pairs (SAR & Optical) veri seti kullanılmıştır.
+
+Bu veri seti Sentinel-1 SAR ve Sentinel-2 optik görüntü çiftlerinden oluşmaktadır. Projede ilk aşamada yalnızca `urban` sınıfındaki Sentinel-1/SAR görüntüleri kullanılmış, optik/RGB görüntüler temiz SAR veri klasörüne dahil edilmemiştir.
+
+Seçilen SAR görüntüleri `data/clean/europe/urban` klasörüne eklenmiştir.
