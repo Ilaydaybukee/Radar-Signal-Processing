@@ -47,3 +47,14 @@ Seçilen SAR görüntüleri `data/clean/europe/urban` klasörüne eklenmiştir.
 Bu veri seti Sentinel-1 SAR ve Sentinel-2 optik görüntü çiftlerinden oluşmaktadır. Projede ilk aşamada yalnızca `agri` sınıfındaki Sentinel-1/SAR görüntüleri kullanılmış, optik/RGB görüntüler temiz SAR veri klasörüne dahil edilmemiştir.
 
 Seçilen SAR görüntüleri `data/clean/europe/agriculture` klasörüne eklenmiştir.
+
+
+### Sentinel-1&2 Image Pairs Agriculture and Grassland Samples
+
+`agriculture` ve `mountain_forest` klasörlerindeki SAR örnekleri için Kaggle üzerinde bulunan Sentinel-1&2 Image Pairs (SAR & Optical) veri seti kullanılmıştır.
+
+Bu veri seti Sentinel-1 SAR ve Sentinel-2 optik görüntü çiftlerinden oluşmaktadır. Projede yalnızca Sentinel-1/SAR görüntüleri kullanılmış, optik/RGB görüntüler temiz SAR veri klasörüne dahil edilmemiştir.
+
+`agriculture` klasörü için veri setindeki `agri` sınıfı kullanılmıştır.
+
+`mountain_forest` klasörü için veri setindeki `grassland` sınıfı kullanılmıştır. Bu görüntüler doğrudan orman/dağ sınıfı değil, doğal açık arazi/kırsal doku örnekleri olarak değerlendirilmiştir.
