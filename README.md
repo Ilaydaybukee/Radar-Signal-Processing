@@ -14,3 +14,11 @@ data/clean/europe/
 ├── river_bridge
 ├── ship_sea
 └── urban
+
+## Kullanılan Veri Kaynağı
+
+Avrupa kıyı bölgesi SAR örnekleri için Kaggle üzerinde bulunan CoastLine-DualPol veri seti kullanılmıştır. Bu veri seti, Avrupa kıyı bölgelerinden elde edilmiş Sentinel-1 SAR genlik görüntü patch'lerini ve bunlara ait kıyı maskelerini içermektedir.
+
+Bu projede ilk aşamada yalnızca `Training/Img2Pol` klasöründeki SAR görüntü patch'leri kullanılmıştır. `Mask` klasöründeki etiket/mask dosyaları temiz görüntü veri klasörüne dahil edilmemiştir.
+
+Seçilen `.mat` dosyalarındaki `ImgPol` değişkeninin birinci polarizasyon kanalı PNG formatına dönüştürülerek `data/clean/europe/coast_port` klasörüne eklenmiştir.
