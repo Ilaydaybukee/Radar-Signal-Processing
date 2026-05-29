@@ -14,6 +14,7 @@ data/clean/europe/
 ├── river_bridge
 ├── ship_sea
 └── urban
+```
 
 ## Kullanılan Veri Kaynağı
 
