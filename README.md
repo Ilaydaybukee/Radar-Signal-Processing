@@ -61,7 +61,7 @@ Bu veri seti Sentinel-1 SAR ve Sentinel-2 optik görüntü çiftlerinden oluşma
 
 | Klasör | İçerik | Durum |
 |---|---|---|
-| `coast_port` | Avrupa kıyı/liman SAR görüntüleri | 16 görüntü eklendi |
+| `coast_port` | Avrupa kıyı/liman SAR görüntüleri | 50 görüntü eklendi |
 | `ship_sea` | SAR gemi/deniz görüntüleri | 50 görüntü eklendi |
 | `urban` | SAR şehir/bina dokusu görüntüleri | 50 görüntü eklendi |
 | `agriculture` | SAR tarım alanı görüntüleri | 50 görüntü eklendi |
