@@ -2,7 +2,8 @@ import torch
 import torch.nn as nn
 import segmentation_models_pytorch as smp
 from pytorch_msssim import ssim
-
+from pathlib import Path
+from PIL import Image
 
 # =========================================================
 # 1) DnCNN BLOĞU
@@ -65,6 +66,36 @@ class DnCNN(nn.Module):
 
         return denoised, predicted_noise
 
+# =========================================================
+# 0) VERİ KLASÖRÜ KONTROLÜ
+# =========================================================
+# Görevi:
+# data/clean/europe klasörü altındaki SAR görüntülerini bulur.
+# Şimdilik eğitim yapmaz, sadece veri yolu doğru mu diye kontrol eder.
+# =========================================================
+
+def check_clean_dataset(data_root="data/clean/europe"):
+    data_root = Path(data_root)
+        if not data_root.exists():
+        print("UYARI: Veri klasörü bulunamadı:", data_root)
+        return []
+
+    image_extensions = [".png", ".jpg", ".jpeg", ".tif", ".tiff"]
+
+    image_paths = []
+    for ext in image_extensions:
+        image_paths.extend(data_root.rglob(f"*{ext}"))
+
+    image_paths = sorted(image_paths)
+
+    print("Veri klasörü:", data_root)
+    print("Bulunan görüntü sayısı:", len(image_paths))
+
+    print("\nİlk 10 görüntü yolu:")
+    for path in image_paths[:10]:
+        print(path)
+
+    return image_paths
 
 # =========================================================
 # 2) U-NET BLOĞU
@@ -189,6 +220,11 @@ class SARHybridLoss(nn.Module):
 
 if __name__ == "__main__":
 
+    print("SAR temiz veri klasörü kontrol ediliyor...")
+
+    clean_image_paths = check_clean_dataset("data/clean/europe")
+
+    print("--------------------------------------------------")
     print("SAR Restoration Hybrid DnCNN + U-Net modeli test ediliyor...")
 
     # Bilgisayarda NVIDIA ekran kartı ve CUDA varsa GPU kullanır.
