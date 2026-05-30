@@ -7,6 +7,7 @@ from PIL import Image
 from PIL import ImageFilter
 import numpy as np
 import matplotlib.pyplot as plt
+from torch.utils.data import DataLoader
 
 # =========================================================
 # 1) DnCNN BLOĞU
@@ -279,6 +280,40 @@ def save_corruption_preview(clean_tensor, blurred_tensor, speckle_tensor, save_p
     print("Bozulma önizleme görseli kaydedildi:", save_path)
 
 # =========================================================
+# 1.9) BATCH BOZULMA ÖNİZLEME GÖRSELİ KAYDETME
+# =========================================================
+# Görevi:
+# DataLoader'dan gelen bir batch içindeki temiz ve bozulmuş SAR
+# görüntülerini karşılaştırmalı olarak kaydeder.
+# =========================================================
+
+def save_batch_preview(corrupted_batch, clean_batch, save_path="batch_corruption_preview.png", max_images=4):
+    batch_size = min(corrupted_batch.size(0), max_images)
+
+    plt.figure(figsize=(8, 3 * batch_size))
+
+    for i in range(batch_size):
+        clean_np = clean_batch[i].squeeze(0).numpy()
+        corrupted_np = corrupted_batch[i].squeeze(0).numpy()
+
+        plt.subplot(batch_size, 2, 2 * i + 1)
+        plt.imshow(clean_np, cmap="gray")
+        plt.title(f"Clean SAR {i+1}")
+        plt.axis("off")
+
+        plt.subplot(batch_size, 2, 2 * i + 2)
+        plt.imshow(corrupted_np, cmap="gray")
+        plt.title(f"Corrupted SAR {i+1}")
+        plt.axis("off")
+
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=150)
+    plt.close()
+
+    print("Batch bozulma önizleme görseli kaydedildi:", save_path)
+
+
+# =========================================================
 # 2) U-NET BLOĞU
 # =========================================================
 # Hazır açık kaynak U-Net kullanıyoruz.
@@ -424,6 +459,26 @@ if __name__ == "__main__":
         print("Clean target tensor boyutu:", clean_target.shape)
         print("Corruption örnek dosya yolu:", corruption_path)
 
+
+    corruption_loader = DataLoader(
+        corruption_dataset,
+        batch_size=4,
+        shuffle=True
+    )
+
+    corrupted_batch, clean_batch, batch_paths = next(iter(corruption_loader))
+
+    print("Corrupted batch boyutu:", corrupted_batch.shape)
+    print("Clean batch boyutu:", clean_batch.shape)
+    print("Batch içindeki ilk dosya yolu:", batch_paths[0])
+
+    save_batch_preview(
+        corrupted_batch,
+        clean_batch,
+        save_path="batch_corruption_preview.png",
+        max_images=4
+    )
+    
     if len(clean_dataset) > 0:
         sample_image, sample_path = clean_dataset[0]
         print("İlk örnek tensor boyutu:", sample_image.shape)
