@@ -4,6 +4,7 @@ import segmentation_models_pytorch as smp
 from pytorch_msssim import ssim
 from pathlib import Path
 from PIL import Image
+from PIL import ImageFilter
 import numpy as np
 
 # =========================================================
@@ -133,6 +134,34 @@ class SARDataset(torch.utils.data.Dataset):
         image_tensor = torch.from_numpy(image_np).unsqueeze(0)
 
         return image_tensor, str(image_path)
+
+# =========================================================
+# 1.6) BLUR BOZULMASI EKLEME
+# =========================================================
+# Görevi:
+# Temiz SAR görüntüsüne Gaussian blur uygular.
+# Böylece eğitim için bozuk giriş görüntüsü oluşturulur.
+# =========================================================
+
+def add_blur(image_tensor, blur_radius=2.0):
+    """
+    image_tensor: [1, H, W] formatında 0-1 aralığında tensor
+    blur_radius: Blur şiddeti
+    """
+
+    # Tensor -> NumPy -> PIL
+    image_np = image_tensor.squeeze(0).numpy()
+    image_uint8 = (image_np * 255).astype(np.uint8)
+    image_pil = Image.fromarray(image_uint8)
+
+    # Gaussian blur uygula
+    blurred_pil = image_pil.filter(ImageFilter.GaussianBlur(radius=blur_radius))
+
+    # PIL -> NumPy -> Tensor
+    blurred_np = np.array(blurred_pil, dtype=np.float32) / 255.0
+    blurred_tensor = torch.from_numpy(blurred_np).unsqueeze(0)
+
+    return blurred_tensor
 
 # =========================================================
 # 2) U-NET BLOĞU
@@ -269,6 +298,8 @@ if __name__ == "__main__":
         sample_image, sample_path = clean_dataset[0]
         print("İlk örnek tensor boyutu:", sample_image.shape)
         print("İlk örnek dosya yolu:", sample_path)
+        blurred_sample = add_blur(sample_image, blur_radius=2.0)
+        print("Blur uygulanmış örnek tensor boyutu:", blurred_sample.shape)
 
     print("--------------------------------------------------")
     print("SAR Restoration Hybrid DnCNN + U-Net modeli test ediliyor...")
