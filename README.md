@@ -69,9 +69,3 @@ Bu veri seti Sentinel-1 SAR ve Sentinel-2 optik görüntü çiftlerinden oluşma
 | `river_bridge` | Nehir/köprü SAR görüntüleri | Uygun veri seçimi devam ediyor |
 
 
-
-
-
-`agriculture` klasörü için veri setindeki `agri` sınıfı kullanılmıştır.
-
-`mountain_forest` klasörü için veri setindeki `grassland` sınıfı kullanılmıştır. Bu görüntüler doğrudan orman/dağ sınıfı değil, doğal açık arazi/kırsal doku örnekleri olarak değerlendirilmiştir.
