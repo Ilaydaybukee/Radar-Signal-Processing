@@ -137,7 +137,59 @@ class SARDataset(torch.utils.data.Dataset):
         return image_tensor, str(image_path)
 
 # =========================================================
-# 1.6) BLUR BOZULMASI EKLEME
+# 1.6) BOZULMUŞ-TEMİZ SAR DATASET SINIFI
+# =========================================================
+# Görevi:
+# Temiz SAR görüntüsünü okur.
+# Aynı görüntüden yapay bozulmuş SAR görüntüsü üretir.
+# Eğitim için:
+# input  = bozulmuş görüntü
+# target = temiz görüntü
+# çiftini döndürür.
+# =========================================================
+
+class SARCorruptionDataset(torch.utils.data.Dataset):
+    def __init__(self, image_paths, image_size=256, corruption_type="blur_speckle"):
+        self.image_paths = image_paths
+        self.image_size = image_size
+        self.corruption_type = corruption_type
+
+    def __len__(self):
+        return len(self.image_paths)
+
+    def __getitem__(self, index):
+        image_path = self.image_paths[index]
+
+        # Temiz görüntüyü grayscale olarak aç
+        image = Image.open(image_path).convert("L")
+
+        # Boyutu 256x256 yap
+        image = image.resize((self.image_size, self.image_size))
+
+        # 0-255 aralığından 0-1 aralığına normalize et
+        image_np = np.array(image, dtype=np.float32) / 255.0
+
+        # Temiz görüntü tensor formatı: [1, H, W]
+        clean_tensor = torch.from_numpy(image_np).unsqueeze(0)
+
+        # Bozulmuş görüntüyü üret
+        if self.corruption_type == "blur":
+            corrupted_tensor = add_blur(clean_tensor, blur_radius=2.0)
+
+        elif self.corruption_type == "speckle":
+            corrupted_tensor = add_speckle_noise(clean_tensor, noise_level=0.2)
+
+        elif self.corruption_type == "blur_speckle":
+            corrupted_tensor = add_blur(clean_tensor, blur_radius=1.5)
+            corrupted_tensor = add_speckle_noise(corrupted_tensor, noise_level=0.2)
+
+        else:
+            corrupted_tensor = clean_tensor
+
+        return corrupted_tensor, clean_tensor, str(image_path)
+
+# =========================================================
+# 1.6.1) BLUR BOZULMASI EKLEME
 # =========================================================
 # Görevi:
 # Temiz SAR görüntüsüne Gaussian blur uygular.
@@ -356,6 +408,21 @@ if __name__ == "__main__":
     clean_dataset = SARDataset(clean_image_paths, image_size=256)
 
     print("Dataset örnek sayısı:", len(clean_dataset))
+
+    corruption_dataset = SARCorruptionDataset(
+        clean_image_paths,
+        image_size=256,
+        corruption_type="blur_speckle"
+    )
+
+    print("Corruption dataset örnek sayısı:", len(corruption_dataset))
+
+    if len(corruption_dataset) > 0:
+        corrupted_image, clean_target, corruption_path = corruption_dataset[0]
+
+        print("Corrupted input tensor boyutu:", corrupted_image.shape)
+        print("Clean target tensor boyutu:", clean_target.shape)
+        print("Corruption örnek dosya yolu:", corruption_path)
 
     if len(clean_dataset) > 0:
         sample_image, sample_path = clean_dataset[0]
