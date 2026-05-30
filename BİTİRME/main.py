@@ -164,6 +164,32 @@ def add_blur(image_tensor, blur_radius=2.0):
     return blurred_tensor
 
 # =========================================================
+# 1.7) SPECKLE NOISE EKLEME
+# =========================================================
+# Görevi:
+# Temiz SAR görüntüsüne multiplicative speckle noise ekler.
+# SAR görüntülerinde speckle çarpımsal gürültü olarak modellenir.
+# =========================================================
+
+def add_speckle_noise(image_tensor, noise_level=0.2):
+    """
+    image_tensor: [1, H, W] formatında 0-1 aralığında tensor
+    noise_level: Speckle gürültü şiddeti
+    """
+
+    # Aynı boyutta rastgele gürültü üret
+    noise = torch.randn_like(image_tensor) * noise_level
+
+    # Multiplicative speckle modeli:
+    # bozuk_görüntü = temiz_görüntü + temiz_görüntü * gürültü
+    noisy_tensor = image_tensor + image_tensor * noise
+
+    # Değerleri 0-1 aralığında tut
+    noisy_tensor = torch.clamp(noisy_tensor, 0.0, 1.0)
+
+    return noisy_tensor
+
+# =========================================================
 # 2) U-NET BLOĞU
 # =========================================================
 # Hazır açık kaynak U-Net kullanıyoruz.
@@ -300,6 +326,9 @@ if __name__ == "__main__":
         print("İlk örnek dosya yolu:", sample_path)
         blurred_sample = add_blur(sample_image, blur_radius=2.0)
         print("Blur uygulanmış örnek tensor boyutu:", blurred_sample.shape)
+
+        speckle_sample = add_speckle_noise(sample_image, noise_level=0.2)
+        print("Speckle eklenmiş örnek tensor boyutu:", speckle_sample.shape)
 
     print("--------------------------------------------------")
     print("SAR Restoration Hybrid DnCNN + U-Net modeli test ediliyor...")
