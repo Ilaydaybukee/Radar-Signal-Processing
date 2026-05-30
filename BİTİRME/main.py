@@ -6,6 +6,7 @@ from pathlib import Path
 from PIL import Image
 from PIL import ImageFilter
 import numpy as np
+import matplotlib.pyplot as plt
 
 # =========================================================
 # 1) DnCNN BLOĞU
@@ -190,6 +191,42 @@ def add_speckle_noise(image_tensor, noise_level=0.2):
     return noisy_tensor
 
 # =========================================================
+# 1.8) BOZULMA ÖNİZLEME GÖRSELİ KAYDETME
+# =========================================================
+# Görevi:
+# Temiz, blur uygulanmış ve speckle eklenmiş SAR görüntülerini
+# yan yana kaydeder.
+# =========================================================
+
+def save_corruption_preview(clean_tensor, blurred_tensor, speckle_tensor, save_path="sample_corruption_preview.png"):
+    clean_np = clean_tensor.squeeze(0).numpy()
+    blurred_np = blurred_tensor.squeeze(0).numpy()
+    speckle_np = speckle_tensor.squeeze(0).numpy()
+
+    plt.figure(figsize=(12, 4))
+
+    plt.subplot(1, 3, 1)
+    plt.imshow(clean_np, cmap="gray")
+    plt.title("Clean SAR")
+    plt.axis("off")
+
+    plt.subplot(1, 3, 2)
+    plt.imshow(blurred_np, cmap="gray")
+    plt.title("Blurred SAR")
+    plt.axis("off")
+
+    plt.subplot(1, 3, 3)
+    plt.imshow(speckle_np, cmap="gray")
+    plt.title("Speckle SAR")
+    plt.axis("off")
+
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=150)
+    plt.close()
+
+    print("Bozulma önizleme görseli kaydedildi:", save_path)
+
+# =========================================================
 # 2) U-NET BLOĞU
 # =========================================================
 # Hazır açık kaynak U-Net kullanıyoruz.
@@ -329,6 +366,13 @@ if __name__ == "__main__":
 
         speckle_sample = add_speckle_noise(sample_image, noise_level=0.2)
         print("Speckle eklenmiş örnek tensor boyutu:", speckle_sample.shape)
+
+            save_corruption_preview(
+            sample_image,
+            blurred_sample,
+            speckle_sample,
+            save_path="sample_corruption_preview.png"
+        )
 
     print("--------------------------------------------------")
     print("SAR Restoration Hybrid DnCNN + U-Net modeli test ediliyor...")
