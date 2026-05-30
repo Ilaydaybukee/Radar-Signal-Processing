@@ -4,6 +4,7 @@ import segmentation_models_pytorch as smp
 from pytorch_msssim import ssim
 from pathlib import Path
 from PIL import Image
+import numpy as np
 
 # =========================================================
 # 1) DnCNN BLOĞU
@@ -97,6 +98,41 @@ def check_clean_dataset(data_root="data/clean/europe"):
         print(path)
 
     return image_paths
+
+# =========================================================
+# 1.5) SAR DATASET SINIFI
+# =========================================================
+# Görevi:
+# Temiz SAR görüntülerini klasörden okur.
+# Görüntüyü grayscale yapar.
+# 256x256 boyutuna getirir.
+# PyTorch tensor formatına çevirir.
+# =========================================================
+
+class SARDataset(torch.utils.data.Dataset):
+    def __init__(self, image_paths, image_size=256):
+        self.image_paths = image_paths
+        self.image_size = image_size
+
+    def __len__(self):
+        return len(self.image_paths)
+
+    def __getitem__(self, index):
+        image_path = self.image_paths[index]
+
+        # Görüntüyü grayscale olarak aç
+        image = Image.open(image_path).convert("L")
+
+        # Boyutu 256x256 yap
+        image = image.resize((self.image_size, self.image_size))
+
+        # 0-255 aralığından 0-1 aralığına normalize et
+        image_np = np.array(image, dtype=np.float32) / 255.0
+
+        # Tensor formatı: [kanal, yükseklik, genişlik]
+        image_tensor = torch.from_numpy(image_np).unsqueeze(0)
+
+        return image_tensor, str(image_path)
 
 # =========================================================
 # 2) U-NET BLOĞU
@@ -224,6 +260,15 @@ if __name__ == "__main__":
     print("SAR temiz veri klasörü kontrol ediliyor...")
 
     clean_image_paths = check_clean_dataset("data/clean/europe")
+    
+    clean_dataset = SARDataset(clean_image_paths, image_size=256)
+
+    print("Dataset örnek sayısı:", len(clean_dataset))
+
+    if len(clean_dataset) > 0:
+        sample_image, sample_path = clean_dataset[0]
+        print("İlk örnek tensor boyutu:", sample_image.shape)
+        print("İlk örnek dosya yolu:", sample_path)
 
     print("--------------------------------------------------")
     print("SAR Restoration Hybrid DnCNN + U-Net modeli test ediliyor...")
