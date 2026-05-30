@@ -76,7 +76,8 @@ class DnCNN(nn.Module):
 
 def check_clean_dataset(data_root="data/clean/europe"):
     data_root = Path(data_root)
-        if not data_root.exists():
+
+    if not data_root.exists():
         print("UYARI: Veri klasörü bulunamadı:", data_root)
         return []
 
