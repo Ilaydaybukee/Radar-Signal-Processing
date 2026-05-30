@@ -57,6 +57,21 @@ Bu veri seti Sentinel-1 SAR ve Sentinel-2 optik görüntü çiftlerinden oluşma
 
 `mountain_forest` klasörü için veri setindeki `grassland` sınıfı kullanılmıştır. Bu görüntüler doğrudan orman/dağ sınıfı değil, doğal açık arazi/kırsal doku örnekleri olarak değerlendirilmiştir.
 
+## Veri Toplama Durumu
+
+| Klasör | İçerik | Durum |
+|---|---|---|
+| `coast_port` | Avrupa kıyı/liman SAR görüntüleri | 16 görüntü eklendi |
+| `ship_sea` | SAR gemi/deniz görüntüleri | 50 görüntü eklendi |
+| `urban` | SAR şehir/bina dokusu görüntüleri | 50 görüntü eklendi |
+| `agriculture` | SAR tarım alanı görüntüleri | 50 görüntü eklendi |
+| `mountain_forest` | Grassland/doğal açık arazi SAR görüntüleri | 50 görüntü eklendi |
+| `river_bridge` | Nehir/köprü SAR görüntüleri | Uygun veri seçimi devam ediyor |
+
+
+
+
+
 `agriculture` klasörü için veri setindeki `agri` sınıfı kullanılmıştır.
 
 `mountain_forest` klasörü için veri setindeki `grassland` sınıfı kullanılmıştır. Bu görüntüler doğrudan orman/dağ sınıfı değil, doğal açık arazi/kırsal doku örnekleri olarak değerlendirilmiştir.
