@@ -1,4 +1,4 @@
-# Radar-Signal-Processing-Bitirme
+# Radar-Signal-Processing
 
 ## Veri Klasör Yapısı
 
