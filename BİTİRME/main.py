@@ -367,11 +367,11 @@ if __name__ == "__main__":
         speckle_sample = add_speckle_noise(sample_image, noise_level=0.2)
         print("Speckle eklenmiş örnek tensor boyutu:", speckle_sample.shape)
 
-            save_corruption_preview(
-            sample_image,
-            blurred_sample,
-            speckle_sample,
-            save_path="sample_corruption_preview.png"
+        save_corruption_preview(
+        sample_image,
+        blurred_sample,
+        speckle_sample,
+        save_path="sample_corruption_preview.png"
         )
 
     print("--------------------------------------------------")
