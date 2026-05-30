@@ -372,7 +372,7 @@ if __name__ == "__main__":
         blurred_sample,
         speckle_sample,
         save_path="sample_corruption_preview.png"
-        )
+    )
 
     print("--------------------------------------------------")
     print("SAR Restoration Hybrid DnCNN + U-Net modeli test ediliyor...")
