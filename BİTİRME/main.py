@@ -78,7 +78,7 @@ class DnCNN(nn.Module):
 # Şimdilik eğitim yapmaz, sadece veri yolu doğru mu diye kontrol eder.
 # =========================================================
 
-def check_clean_dataset(data_root="data/clean"):def check_clean_dataset(data_root="data/clean"):
+def check_clean_dataset(data_root="data/clean"):
     data_root = Path(data_root)
 
     if not data_root.exists():
