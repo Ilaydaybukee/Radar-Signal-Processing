@@ -624,35 +624,57 @@ if __name__ == "__main__":
 
     print("Optimizer ve loss fonksiyonu oluşturuldu.")
 
-        # Gerçek SAR batch ile mini eğitim testi
+    
+    # Gerçek SAR batch ile çok adımlı mini eğitim testi
     if len(corruption_dataset) > 0:
         model.train()
 
-        corrupted_batch = corrupted_batch.to(device)
-        clean_batch = clean_batch.to(device)
-
-        restored_batch, denoised_batch, predicted_noise_batch, correction_batch = model(corrupted_batch)
-
-        train_loss, train_loss_dict = loss_fn(restored_batch, clean_batch)
-
-        optimizer.zero_grad()
-        train_loss.backward()
-        optimizer.step()
+        mini_train_steps = 10
+        last_corrupted_batch = None
+        last_clean_batch = None
+        last_restored_batch = None
 
         print("--------------------------------------------------")
-        print("Mini eğitim testi yapıldı.")
-        print("Mini train loss:", train_loss.item())
-        print("Mini loss detayları:", train_loss_dict)
-        print("Restore batch boyutu:", restored_batch.shape)
+        print("Çok adımlı mini eğitim testi başlıyor...")
+
+        for step, (train_corrupted_batch, train_clean_batch, train_paths) in enumerate(corruption_loader):
+            if step >= mini_train_steps:
+                break
+
+            train_corrupted_batch = train_corrupted_batch.to(device)
+            train_clean_batch = train_clean_batch.to(device)
+
+            restored_batch, denoised_batch, predicted_noise_batch, correction_batch = model(train_corrupted_batch)
+
+            train_loss, train_loss_dict = loss_fn(restored_batch, train_clean_batch)
+
+            optimizer.zero_grad()
+            train_loss.backward()
+            optimizer.step()
+
+            print(
+                f"Mini step {step + 1}/{mini_train_steps} | "
+                f"loss: {train_loss.item():.6f} | "
+                f"L1: {train_loss_dict['l1']:.6f} | "
+                f"MSE: {train_loss_dict['mse']:.6f} | "
+                f"SSIM: {train_loss_dict['ssim']:.6f}"
+            )
+
+            last_corrupted_batch = train_corrupted_batch
+            last_clean_batch = train_clean_batch
+            last_restored_batch = restored_batch
+
+        print("Çok adımlı mini eğitim testi tamamlandı.")
+        print("Son restore batch boyutu:", last_restored_batch.shape)
         print("--------------------------------------------------")
 
         save_restore_preview(
-            clean_batch,
-            corrupted_batch,
-            restored_batch,
-            save_path="restore_preview.png",
+            last_clean_batch,
+            last_corrupted_batch,
+            last_restored_batch,
+            save_path="mini_trained_restore_preview.png",
             max_images=4
-        )
+    )
 
     # Sahte SAR görüntüsü oluştur
     # 2   = aynı anda 2 görüntü
