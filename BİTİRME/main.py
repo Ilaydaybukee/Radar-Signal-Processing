@@ -78,7 +78,7 @@ class DnCNN(nn.Module):
 # Şimdilik eğitim yapmaz, sadece veri yolu doğru mu diye kontrol eder.
 # =========================================================
 
-def check_clean_dataset(data_root="data/clean/europe"):
+def check_clean_dataset(data_root="data/clean"):def check_clean_dataset(data_root="data/clean"):
     data_root = Path(data_root)
 
     if not data_root.exists():
@@ -438,7 +438,7 @@ if __name__ == "__main__":
 
     print("SAR temiz veri klasörü kontrol ediliyor...")
 
-    clean_image_paths = check_clean_dataset("data/clean/europe")
+    clean_image_paths = check_clean_dataset("data/clean")
     
     clean_dataset = SARDataset(clean_image_paths, image_size=256)
 
