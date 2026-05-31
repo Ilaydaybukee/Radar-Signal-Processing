@@ -312,6 +312,50 @@ def save_batch_preview(corrupted_batch, clean_batch, save_path="batch_corruption
 
     print("Batch bozulma önizleme görseli kaydedildi:", save_path)
 
+# =========================================================
+# 1.10) RESTORE ÖNİZLEME GÖRSELİ KAYDETME
+# =========================================================
+# Görevi:
+# Temiz, bozulmuş ve modelden çıkan restore görüntülerini
+# yan yana kaydeder.
+# =========================================================
+
+def save_restore_preview(clean_batch, corrupted_batch, restored_batch, save_path="restore_preview.png", max_images=4):
+    batch_size = min(clean_batch.size(0), max_images)
+
+    clean_batch = clean_batch.detach().cpu()
+    corrupted_batch = corrupted_batch.detach().cpu()
+    restored_batch = restored_batch.detach().cpu()
+
+    plt.figure(figsize=(12, 3 * batch_size))
+
+    for i in range(batch_size):
+        clean_np = clean_batch[i].squeeze(0).numpy()
+        corrupted_np = corrupted_batch[i].squeeze(0).numpy()
+        restored_np = restored_batch[i].squeeze(0).numpy()
+
+        plt.subplot(batch_size, 3, 3 * i + 1)
+        plt.imshow(clean_np, cmap="gray")
+        plt.title(f"Clean SAR {i+1}")
+        plt.axis("off")
+
+        plt.subplot(batch_size, 3, 3 * i + 2)
+        plt.imshow(corrupted_np, cmap="gray")
+        plt.title(f"Corrupted SAR {i+1}")
+        plt.axis("off")
+
+        plt.subplot(batch_size, 3, 3 * i + 3)
+        plt.imshow(restored_np, cmap="gray")
+        plt.title(f"Restored SAR {i+1}")
+        plt.axis("off")
+
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=150)
+    plt.close()
+
+    print("Restore önizleme görseli kaydedildi:", save_path)
+
+
 
 # =========================================================
 # 2) U-NET BLOĞU
@@ -573,6 +617,42 @@ if __name__ == "__main__":
     model = HybridDnCNNUNetResidual().to(device)
 
     print("Model başarıyla oluşturuldu.")
+
+    # Mini eğitim testi için optimizer oluştur
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
+    loss_fn = SARHybridLoss()
+
+    print("Optimizer ve loss fonksiyonu oluşturuldu.")
+
+        # Gerçek SAR batch ile mini eğitim testi
+    if len(corruption_dataset) > 0:
+        model.train()
+
+        corrupted_batch = corrupted_batch.to(device)
+        clean_batch = clean_batch.to(device)
+
+        restored_batch, denoised_batch, predicted_noise_batch, correction_batch = model(corrupted_batch)
+
+        train_loss, train_loss_dict = loss_fn(restored_batch, clean_batch)
+
+        optimizer.zero_grad()
+        train_loss.backward()
+        optimizer.step()
+
+        print("--------------------------------------------------")
+        print("Mini eğitim testi yapıldı.")
+        print("Mini train loss:", train_loss.item())
+        print("Mini loss detayları:", train_loss_dict)
+        print("Restore batch boyutu:", restored_batch.shape)
+        print("--------------------------------------------------")
+
+        save_restore_preview(
+            clean_batch,
+            corrupted_batch,
+            restored_batch,
+            save_path="restore_preview.png",
+            max_images=4
+        )
 
     # Sahte SAR görüntüsü oluştur
     # 2   = aynı anda 2 görüntü
