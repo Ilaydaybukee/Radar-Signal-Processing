@@ -496,6 +496,70 @@ if __name__ == "__main__":
         save_path="sample_corruption_preview.png"
     )
 
+
+    # Türkiye veri klasörü için ayrıca batch önizleme testi
+    turkiye_image_paths = check_clean_dataset("data/clean/türkiye")
+
+    turkiye_dataset = SARCorruptionDataset(
+        turkiye_image_paths,
+        image_size=256,
+        corruption_type="blur_speckle"
+    )
+
+    print("Türkiye corruption dataset örnek sayısı:", len(turkiye_dataset))
+
+    if len(turkiye_dataset) > 0:
+        turkiye_loader = DataLoader(
+            turkiye_dataset,
+            batch_size=4,
+            shuffle=True
+        )
+
+        turkiye_corrupted_batch, turkiye_clean_batch, turkiye_batch_paths = next(iter(turkiye_loader))
+
+        print("Türkiye corrupted batch boyutu:", turkiye_corrupted_batch.shape)
+        print("Türkiye clean batch boyutu:", turkiye_clean_batch.shape)
+        print("Türkiye batch ilk dosya yolu:", turkiye_batch_paths[0])
+
+        save_batch_preview(
+            turkiye_corrupted_batch,
+            turkiye_clean_batch,
+            save_path="turkiye_batch_corruption_preview.png",
+            max_images=4
+        )
+        
+
+    # Avrupa veri klasörü için ayrıca batch önizleme testi
+    europe_image_paths = check_clean_dataset("data/clean/europe")
+
+    europe_dataset = SARCorruptionDataset(
+        europe_image_paths,
+        image_size=256,
+        corruption_type="blur_speckle"
+    )
+
+    print("Europe corruption dataset örnek sayısı:", len(europe_dataset))
+
+    if len(europe_dataset) > 0:
+        europe_loader = DataLoader(
+            europe_dataset,
+            batch_size=4,
+            shuffle=True
+        )
+
+        europe_corrupted_batch, europe_clean_batch, europe_batch_paths = next(iter(europe_loader))
+
+        print("Europe corrupted batch boyutu:", europe_corrupted_batch.shape)
+        print("Europe clean batch boyutu:", europe_clean_batch.shape)
+        print("Europe batch ilk dosya yolu:", europe_batch_paths[0])
+
+        save_batch_preview(
+            europe_corrupted_batch,
+            europe_clean_batch,
+            save_path="europe_batch_corruption_preview.png",
+            max_images=4
+        )
+    
     print("--------------------------------------------------")
     print("SAR Restoration Hybrid DnCNN + U-Net modeli test ediliyor...")
 
