@@ -629,7 +629,8 @@ if __name__ == "__main__":
     if len(corruption_dataset) > 0:
         model.train()
 
-        mini_train_steps = 10
+        mini_train_steps = 30
+        mini_loss_values = []
         last_corrupted_batch = None
         last_clean_batch = None
         last_restored_batch = None
@@ -652,6 +653,8 @@ if __name__ == "__main__":
             train_loss.backward()
             optimizer.step()
 
+            mini_loss_values.append(train_loss.item())
+
             print(
                 f"Mini step {step + 1}/{mini_train_steps} | "
                 f"loss: {train_loss.item():.6f} | "
@@ -668,6 +671,19 @@ if __name__ == "__main__":
         print("Son restore batch boyutu:", last_restored_batch.shape)
         print("--------------------------------------------------")
 
+        plt.figure(figsize=(8, 5))
+        plt.plot(range(1, len(mini_loss_values) + 1), mini_loss_values, marker="o")
+        plt.xlabel("Mini Training Step")
+        plt.ylabel("Loss")
+        plt.title("Mini Training Loss Curve")
+        plt.grid(True)
+        plt.tight_layout()
+        plt.savefig("loss_curve.png", dpi=150)
+        plt.close()
+
+        print("Loss grafiği kaydedildi: loss_curve.png")
+
+        
         save_restore_preview(
             last_clean_batch,
             last_corrupted_batch,
