@@ -603,7 +603,36 @@ if __name__ == "__main__":
             save_path="europe_batch_corruption_preview.png",
             max_images=4
         )
-    
+    # Asya veri klasörü için ayrıca batch önizleme testi
+    asia_image_paths = check_clean_dataset("data/clean/asia")
+
+    asia_dataset = SARCorruptionDataset(
+        asia_image_paths,
+        image_size=256,
+        corruption_type="blur_speckle"
+    )
+
+    print("Asia corruption dataset örnek sayısı:", len(asia_dataset))
+
+    if len(asia_dataset) > 0:
+        asia_loader = DataLoader(
+            asia_dataset,
+            batch_size=4,
+            shuffle=True
+        )
+
+        asia_corrupted_batch, asia_clean_batch, asia_batch_paths = next(iter(asia_loader))
+
+        print("Asia corrupted batch boyutu:", asia_corrupted_batch.shape)
+        print("Asia clean batch boyutu:", asia_clean_batch.shape)
+        print("Asia batch ilk dosya yolu:", asia_batch_paths[0])
+
+        save_batch_preview(
+            asia_corrupted_batch,
+            asia_clean_batch,
+            save_path="asia_batch_corruption_preview.png",
+            max_images=4
+        )
     print("--------------------------------------------------")
     print("SAR Restoration Hybrid DnCNN + U-Net modeli test ediliyor...")
 
