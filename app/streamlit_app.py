@@ -88,13 +88,13 @@ def main() -> None:
     st.set_page_config(
         page_title="SAR Ship-Sea Classification",
         page_icon="📡",
-        layout="centered",
+        layout="wide",
     )
 
     st.title("📡 SAR Ship-Sea Classification")
     st.write(
-        "Upload a SAR image patch and the trained CNN model will classify it "
-        "as **sea** or **ship**."
+        "Upload one or more SAR image patches and the trained CNN model will classify "
+        "each image as **sea** or **ship**."
     )
 
     st.info(
@@ -108,38 +108,64 @@ def main() -> None:
         )
         st.stop()
 
-    uploaded_file = st.file_uploader(
-        "Upload SAR image",
+    uploaded_files = st.file_uploader(
+        "Upload SAR images",
         type=["png", "jpg", "jpeg", "tif", "tiff"],
+        accept_multiple_files=True,
     )
 
-    if uploaded_file is None:
-        st.warning("Please upload a SAR image to start prediction.")
+    if not uploaded_files:
+        st.warning("Please upload one or more SAR images to start prediction.")
         return
 
-    image = Image.open(uploaded_file)
+    st.subheader("Batch Prediction Results")
 
-    st.subheader("Uploaded Image")
-    st.image(image, caption="Input SAR image", use_container_width=True)
+    results = []
 
-    predicted_class, confidence, probabilities = predict(image)
+    for uploaded_file in uploaded_files:
+        image = Image.open(uploaded_file)
 
-    st.subheader("Prediction Result")
+        predicted_class, confidence, probabilities = predict(image)
 
-    if predicted_class == "ship":
-        st.success(f"Prediction: **SHIP** 🚢")
-    else:
-        st.success(f"Prediction: **SEA** 🌊")
+        results.append(
+            {
+                "Image": uploaded_file.name,
+                "Prediction": predicted_class.upper(),
+                "Confidence (%)": round(confidence * 100, 2),
+                "Sea Probability (%)": round(probabilities[0] * 100, 2),
+                "Ship Probability (%)": round(probabilities[1] * 100, 2),
+            }
+        )
 
-    st.metric("Confidence", f"{confidence * 100:.2f}%")
+    st.dataframe(results, use_container_width=True)
 
-    st.subheader("Class Probabilities")
+    st.subheader("Image Preview and Individual Results")
 
-    st.write(f"Sea probability: **{probabilities[0] * 100:.2f}%**")
-    st.progress(probabilities[0])
+    for uploaded_file, result in zip(uploaded_files, results):
+        image = Image.open(uploaded_file)
 
-    st.write(f"Ship probability: **{probabilities[1] * 100:.2f}%**")
-    st.progress(probabilities[1])
+        with st.expander(f"{uploaded_file.name} → {result['Prediction']}"):
+            col1, col2 = st.columns([1, 1])
+
+            with col1:
+                st.image(image, caption="Input SAR image", use_container_width=True)
+
+            with col2:
+                prediction = result["Prediction"]
+                confidence = result["Confidence (%)"]
+
+                if prediction == "SHIP":
+                    st.success("Prediction: **SHIP** 🚢")
+                else:
+                    st.success("Prediction: **SEA** 🌊")
+
+                st.metric("Confidence", f"{confidence:.2f}%")
+
+                st.write(f"Sea probability: **{result['Sea Probability (%)']:.2f}%**")
+                st.progress(result["Sea Probability (%)"] / 100)
+
+                st.write(f"Ship probability: **{result['Ship Probability (%)']:.2f}%**")
+                st.progress(result["Ship Probability (%)"] / 100)
 
 
 if __name__ == "__main__":
