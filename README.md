@@ -1,71 +1,75 @@
-# Radar-Signal-Processing
+# Global SAR Ship-Sea Classification
 
-## Veri Klasör Yapısı
+## Project Goal
 
-Proje kapsamında temiz SAR görüntüleri `data/clean` klasörü altında toplanacaktır.
+Global SAR Ship-Sea Classification is a student engineering research project for building a clean, topic-based binary image classification workflow for Synthetic Aperture Radar (SAR) imagery.
 
-Avrupa bölgesi için veri klasörleri:
+The goal is to classify SAR image patches into one of two classes:
+
+1. **ship** — SAR image patches that contain visible ship targets.
+2. **sea** — SAR image patches that contain open-sea background without ship targets.
+
+This repository is intentionally organized around a single research topic: global ship-versus-sea SAR classification. It does not include the previous restoration, denoising, corrupted/clean image-pair, or region-based dataset workflow.
+
+## Dataset Folder Structure
+
+The dataset is organized into raw and processed folders. Data folders are kept empty in version control except for `.gitkeep` files.
 
 ```text
-data/clean/europe/
-├── agriculture
-├── coast_port
-├── mountain_forest
-├── river_bridge
-├── ship_sea
-└── urban
+data/
+├── raw/
+│   ├── ship/
+│   │   └── .gitkeep
+│   └── sea/
+│       └── .gitkeep
+└── processed/
+    ├── train/
+    │   ├── ship/
+    │   │   └── .gitkeep
+    │   └── sea/
+    │       └── .gitkeep
+    ├── val/
+    │   ├── ship/
+    │   │   └── .gitkeep
+    │   └── sea/
+    │       └── .gitkeep
+    └── test/
+        ├── ship/
+        │   └── .gitkeep
+        └── sea/
+            └── .gitkeep
 ```
 
-## Kullanılan Veri Kaynağı
+Place original SAR images in `data/raw/ship/` and `data/raw/sea/`. The prepared train, validation, and test splits should be written to `data/processed/`.
 
-Avrupa kıyı bölgesi SAR örnekleri için Kaggle üzerinde bulunan CoastLine-DualPol veri seti kullanılmıştır. Bu veri seti, Avrupa kıyı bölgelerinden elde edilmiş Sentinel-1 SAR genlik görüntü patch'lerini ve bunlara ait kıyı maskelerini içermektedir.
+## Planned Pipeline
 
-Bu projede ilk aşamada yalnızca `Training/Img2Pol` klasöründeki SAR görüntü patch'leri kullanılmıştır. `Mask` klasöründeki etiket/mask dosyaları temiz görüntü veri klasörüne dahil edilmemiştir.
+The planned engineering workflow is:
 
-Seçilen `.mat` dosyalarındaki `ImgPol` değişkeninin birinci polarizasyon kanalı PNG formatına dönüştürülerek `data/clean/europe/coast_port` klasörüne eklenmiştir.
+1. Collect or curate global SAR image patches for ship and sea classes.
+2. Place raw images into the class-specific raw data folders.
+3. Validate the dataset structure and image readability.
+4. Split the dataset into train, validation, and test subsets.
+5. Build a PyTorch dataset loader for binary classification.
+6. Train a baseline convolutional neural network or transfer-learning model.
+7. Evaluate classification metrics on the test set.
+8. Use a future Streamlit interface for simple image upload and prediction demos.
 
-### SARscope Maritime Images
+## Repository Structure
 
-`ship_sea` klasöründeki ilk SAR gemi/deniz örnekleri için Kaggle üzerinde bulunan SARscope: Synthetic Aperture Radar Maritime Images veri seti kullanılmıştır.
+```text
+config/                 Configuration files
+scripts/                Dataset preparation and checking scripts
+src/                    Beginner-friendly Python modules for model work
+app/                    Future Streamlit interface
+notebooks/              Exploratory notebooks
+data/                   Local dataset folders ignored except .gitkeep files
+```
 
-Bu veri seti HRSID ve OPEN-SSDD kaynaklarından işlenmiş SAR gemi görüntülerini içermektedir. Projede ilk aşamada yalnızca `.jpg` görüntü dosyaları kullanılmış, `_annotations.coco.json` etiket dosyası temiz görüntü veri klasörüne dahil edilmemiştir.  
+## Student Engineering Research Purpose
 
-Seçilen görüntüler `data/clean/europe/ship_sea` klasörüne eklenmiştir. 
+This project is designed as a readable research and engineering foundation for students studying SAR image processing, remote sensing, and deep learning classification. The current code files are placeholders that describe the intended responsibilities of each module without implementing a full deep learning system yet.
 
-### Sentinel-1&2 Image Pairs Urban Samples
+## Future Streamlit Interface
 
-`urban` klasöründeki SAR şehir/bina dokusu örnekleri için Kaggle üzerinde bulunan Sentinel-1&2 Image Pairs (SAR & Optical) veri seti kullanılmıştır.
-
-Bu veri seti Sentinel-1 SAR ve Sentinel-2 optik görüntü çiftlerinden oluşmaktadır. Projede ilk aşamada yalnızca `urban` sınıfındaki Sentinel-1/SAR görüntüleri kullanılmış, optik/RGB görüntüler temiz SAR veri klasörüne dahil edilmemiştir.
-
-Seçilen SAR görüntüleri `data/clean/europe/urban` klasörüne eklenmiştir.
-
-### Sentinel-1&2 Image Pairs Agriculture Samples
-
-`agriculture` klasöründeki SAR tarım alanı örnekleri için Kaggle üzerinde bulunan Sentinel-1&2 Image Pairs (SAR & Optical) veri seti kullanılmıştır.
-
-Bu veri seti Sentinel-1 SAR ve Sentinel-2 optik görüntü çiftlerinden oluşmaktadır. Projede ilk aşamada yalnızca `agri` sınıfındaki Sentinel-1/SAR görüntüleri kullanılmış, optik/RGB görüntüler temiz SAR veri klasörüne dahil edilmemiştir.
-
-Seçilen SAR görüntüleri `data/clean/europe/agriculture` klasörüne eklenmiştir.
-
-
-### Sentinel-1&2 Image Pairs Grassland Samples
-
-`mountain_forest` klasöründeki SAR doğal arazi/kırsal doku örnekleri için Kaggle üzerinde bulunan Sentinel-1&2 Image Pairs (SAR & Optical) veri seti kullanılmıştır.
-
-Bu veri seti Sentinel-1 SAR ve Sentinel-2 optik görüntü çiftlerinden oluşmaktadır. Projede yalnızca Sentinel-1/SAR görüntüleri kullanılmış, optik/RGB görüntüler temiz SAR veri klasörüne dahil edilmemiştir.
-
-`mountain_forest` klasörü için veri setindeki `grassland` sınıfı kullanılmıştır. Bu görüntüler doğrudan orman/dağ sınıfı değil, doğal açık arazi/kırsal doku örnekleri olarak değerlendirilmiştir.
-
-## Veri Toplama Durumu
-
-| Klasör | İçerik | Durum |
-|---|---|---|
-| `coast_port` | Avrupa kıyı/liman SAR görüntüleri | 50 görüntü eklendi |
-| `ship_sea` | SAR gemi/deniz görüntüleri | 50 görüntü eklendi |
-| `urban` | SAR şehir/bina dokusu görüntüleri | 50 görüntü eklendi |
-| `agriculture` | SAR tarım alanı görüntüleri | 50 görüntü eklendi |
-| `mountain_forest` | Grassland/doğal açık arazi SAR görüntüleri | 50 görüntü eklendi |
-| `river_bridge` | Nehir/köprü SAR görüntüleri | Uygun veri seçimi devam ediyor |
-
-
+A future Streamlit application will provide a simple interface where a user can upload a SAR image patch and receive a predicted class: `ship` or `sea`. The initial `app/streamlit_app.py` file is a placeholder for that interface.
