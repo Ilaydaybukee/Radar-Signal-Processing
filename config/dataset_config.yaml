@@ -1,14 +1,20 @@
 project_name: Global SAR Ship-Sea Classification
+
 classes:
   - ship
   - sea
+
 paths:
   raw_data: data/raw
   processed_data: data/processed
+
 splits:
   train: 0.7
   val: 0.15
   test: 0.15
+
 image:
-  size: 224
-  channels: 3
+  patch_size: 256
+  channels: 1
+
+random_seed: 42
