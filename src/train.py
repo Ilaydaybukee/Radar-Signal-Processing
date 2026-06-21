@@ -1,16 +1,4 @@
-"""Train a simple CNN for Global SAR Ship-Sea Classification.
-
-This script trains a small CNN using the processed dataset:
-
-data/processed/train/ship
-data/processed/train/sea
-data/processed/val/ship
-data/processed/val/sea
-
-Run from the project root:
-
-python src/train.py
-"""
+"""Train a simple CNN for Global SAR Ship-Sea Classification."""
 
 from pathlib import Path
 
@@ -34,28 +22,10 @@ LEARNING_RATE = 0.001
 
 def get_device() -> torch.device:
     """Use CUDA GPU if available, otherwise use CPU."""
-    if torch.cuda.is_available():
-        return torch.device("cuda")
-
-    return torch.device("cpu")
+    return torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def calculate_accuracy(outputs: torch.Tensor, labels: torch.Tensor) -> float:
-    """Calculate classification accuracy for one batch."""
-    predictions = outputs.argmax(dim=1)
-    correct = (predictions == labels).sum().item()
-    total = labels.size(0)
-
-    return correct / total if total > 0 else 0.0
-
-
-def run_one_training_epoch(
-    model: nn.Module,
-    dataloader: DataLoader,
-    criterion: nn.Module,
-    optimizer: torch.optim.Optimizer,
-    device: torch.device,
-) -> tuple[float, float]:
+def run_one_training_epoch(model, dataloader, criterion, optimizer, device):
     """Train the model for one epoch."""
     model.train()
 
@@ -87,12 +57,7 @@ def run_one_training_epoch(
     return average_loss, accuracy
 
 
-def run_validation(
-    model: nn.Module,
-    dataloader: DataLoader,
-    criterion: nn.Module,
-    device: torch.device,
-) -> tuple[float, float]:
+def run_validation(model, dataloader, criterion, device):
     """Evaluate the model on the validation split."""
     model.eval()
 
@@ -139,19 +104,11 @@ def main() -> None:
     if len(val_dataset) == 0:
         print("WARNING: No validation images found. Training will continue without validation.")
 
-    train_loader = DataLoader(
-        train_dataset,
-        batch_size=BATCH_SIZE,
-        shuffle=True,
-    )
-
-    val_loader = DataLoader(
-        val_dataset,
-        batch_size=BATCH_SIZE,
-        shuffle=False,
-    )
+    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
     device = get_device()
+
     print(f"Using device: {device}")
     print(f"Training samples: {len(train_dataset)}")
     print(f"Validation samples: {len(val_dataset)}")

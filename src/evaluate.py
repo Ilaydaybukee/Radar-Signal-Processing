@@ -31,10 +31,7 @@ BATCH_SIZE = 8
 
 def get_device() -> torch.device:
     """Use CUDA GPU if available, otherwise use CPU."""
-    if torch.cuda.is_available():
-        return torch.device("cuda")
-
-    return torch.device("cpu")
+    return torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def main() -> None:
@@ -65,6 +62,7 @@ def main() -> None:
     )
 
     device = get_device()
+
     model = SimpleSARClassifier(num_classes=2).to(device)
     model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
     model.eval()

@@ -24,15 +24,15 @@ class SimpleSARClassifier(nn.Module):
             # Input: [batch, 1, 256, 256]
             nn.Conv2d(in_channels=1, out_channels=16, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2),  # -> [batch, 16, 128, 128]
+            nn.MaxPool2d(kernel_size=2),  # [batch, 16, 128, 128]
 
             nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2),  # -> [batch, 32, 64, 64]
+            nn.MaxPool2d(kernel_size=2),  # [batch, 32, 64, 64]
 
             nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2),  # -> [batch, 64, 32, 32]
+            nn.MaxPool2d(kernel_size=2),  # [batch, 64, 32, 32]
         )
 
         self.classifier = nn.Sequential(
@@ -44,14 +44,14 @@ class SimpleSARClassifier(nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Forward pass."""
+        """Run the input image through the CNN."""
         x = self.features(x)
         x = self.classifier(x)
         return x
 
 
 def main() -> None:
-    """Quick model shape check."""
+    """Quick model test."""
     model = SimpleSARClassifier()
 
     dummy_input = torch.randn(1, 1, 256, 256)
