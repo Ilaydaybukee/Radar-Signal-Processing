@@ -22,7 +22,7 @@ In this project, SAR image patches are used for a binary classification task:
 | `ship` | SAR patches containing ship targets     |
 | `sea`  | SAR patches containing open sea surface |
 
-The current implementation is a first prototype and uses a lightweight convolutional neural network for ship-sea classification.
+The current implementation uses a lightweight convolutional neural network as a prototype model for ship-sea classification.
 
 ---
 
@@ -32,22 +32,22 @@ The dataset used in the current prototype is balanced:
 
 | Class | Number of Images |
 | ----- | ---------------: |
-| Ship  |               50 |
-| Sea   |               50 |
-| Total |              100 |
+| Ship  |             1000 |
+| Sea   |             1000 |
+| Total |             2000 |
 
 The dataset is split as:
 
 | Split      | Ship | Sea | Total |
 | ---------- | ---: | --: | ----: |
-| Train      |   35 |  35 |    70 |
-| Validation |    7 |   7 |    14 |
-| Test       |    8 |   8 |    16 |
+| Train      |  700 | 700 |  1400 |
+| Validation |  150 | 150 |   300 |
+| Test       |  150 | 150 |   300 |
 
 ### Data Sources
 
-* Ship images were collected from SAR ship image datasets such as OpenSARShip-style SAR ship patches.
-* Sea images were generated as Sentinel-1 SAR open sea patches using Google Earth Engine.
+* Ship images were selected from OpenSARShip SAR ship patches with multiple vessel categories.
+* Sea images were generated from European Sentinel-1 open-sea SAR regions using Google Earth Engine.
 
 > Note: Since the ship and sea samples may come from different data sources, the current results should be interpreted as prototype-level results.
 
@@ -248,7 +248,7 @@ The first prototype achieved:
 | Validation Accuracy | 100% |
 | Test Accuracy       |   100% |
 
-These results show that the pipeline works successfully on the current small dataset.
+These results show that the pipeline works successfully on the current 2000-image balanced prototype dataset.
 
 ---
 
@@ -271,9 +271,9 @@ The confusion matrix on the test set is shown below:
 
 The current version is an early prototype. The main limitations are:
 
-* The dataset size is small.
-* The test set contains only 16 images.
-* Ship and sea images may come from different data sources.
+* The dataset is larger than the initial prototype, but it is still limited for real-world generalization.
+* The test set contains 300 images, but the samples are still derived from limited data sources.
+* Ship and sea images come from different data sources, so source-related bias may still exist.
 * The model may learn source-related differences in addition to ship-sea features.
 * More diverse SAR images from different regions, seasons, incidence angles, and sea states are needed.
 
@@ -309,4 +309,4 @@ Current completed stages:
 * Test evaluation
 * GitHub integration
 
-This repository currently represents a working prototype for SAR-based ship-sea classification.
+This repository currently represents a working prototype for SAR-based ship-sea classification using a 2000-image balanced dataset.
