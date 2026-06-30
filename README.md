@@ -193,12 +193,12 @@ Example test result from the current prototype:
 SAR Ship-Sea Test Evaluation
 ============================
 Using device: cuda
-Test samples: 16
+Test samples: 300
 Test accuracy: 1.0000
 
 Per-class results:
-  sea: 8/8 correct | accuracy: 1.0000
-  ship: 8/8 correct | accuracy: 1.0000
+  sea: 150/150 correct | accuracy: 1.0000
+  ship: 150/150 correct | accuracy: 1.0000
 ```
 
 ---
@@ -245,7 +245,7 @@ The first prototype achieved:
 | Metric              | Result |
 | ------------------- | -----: |
 | Training Accuracy   |   100% |
-| Validation Accuracy | 92.86% |
+| Validation Accuracy | 100% |
 | Test Accuracy       |   100% |
 
 These results show that the pipeline works successfully on the current small dataset.
