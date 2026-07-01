@@ -32,17 +32,17 @@ The dataset used in the current prototype is balanced:
 
 | Class | Number of Images |
 | ----- | ---------------: |
-| Ship  |             1000 |
-| Sea   |             1000 |
-| Total |             2000 |
+| Ship  |             2500 |
+| Sea   |             2500 |
+| Total |             5000 |
 
 The dataset is split as:
 
 | Split      | Ship | Sea | Total |
 | ---------- | ---: | --: | ----: |
-| Train      |  700 | 700 |  1400 |
-| Validation |  150 | 150 |   300 |
-| Test       |  150 | 150 |   300 |
+| Train      |  700 | 700 |  3500 |
+| Validation |  150 | 150 |   750 |
+| Test       |  150 | 150 |   750 |
 
 ### Data Sources
 
@@ -193,12 +193,12 @@ Example test result from the current prototype:
 SAR Ship-Sea Test Evaluation
 ============================
 Using device: cuda
-Test samples: 300
+Test samples: 750
 Test accuracy: 1.0000
 
 Per-class results:
-  sea: 150/150 correct | accuracy: 1.0000
-  ship: 150/150 correct | accuracy: 1.0000
+  sea: 375/375 correct | accuracy: 1.0000
+  ship: 375/375 correct | accuracy: 1.0000
 ```
 
 ---
@@ -248,7 +248,7 @@ The expanded prototype achieved:
 | Validation Accuracy | 100% |
 | Test Accuracy       |   100% |
 
-These results show that the pipeline works successfully on the current 2000-image balanced prototype dataset.
+These results show that the pipeline works successfully on the current 5000-image balanced prototype dataset.
 
 ---
 
@@ -267,25 +267,25 @@ The confusion matrix on the test set is shown below:
 ![Confusion Matrix](outputs/confusion_matrix.png)
 
 
-### Latest Expanded Dataset Run
+### Latest Expanded Dataset Run - 5000 Images
 
-The dataset was expanded from the initial 100-image prototype to a balanced 2000-image dataset.
+The dataset was expanded from the initial 100-image prototype to a balanced 5000-image dataset.
 
 | Class | Number of Images |
 |---|---:|
-| Ship | 1000 |
-| Sea | 1000 |
-| Total | 2000 |
+| Ship | 2500 |
+| Sea | 2500 |
+| Total | 5000 |
 
 The processed dataset split is:
 
 | Split | Ship | Sea | Total |
 |---|---:|---:|---:|
-| Train | 700 | 700 | 1400 |
-| Validation | 150 | 150 | 300 |
-| Test | 150 | 150 | 300 |
+| Train | 700 | 700 | 3500 |
+| Validation | 150 | 150 | 750 |
+| Test | 150 | 150 | 750 |
 
-The CNN model was retrained using the expanded dataset and achieved 100% accuracy on the 300-image test set.
+The CNN model was retrained using the expanded dataset and achieved 100% accuracy on the 750-image test set.
 
 > Note: Since ship images are selected from OpenSARShip and sea patches are generated from Sentinel-1 open-sea regions, the results should still be interpreted carefully with respect to possible source-domain differences.
 
@@ -294,7 +294,7 @@ The CNN model was retrained using the expanded dataset and achieved 100% accurac
 The current version is an early prototype. The main limitations are:
 
 * The dataset is larger than the initial prototype, but it is still limited for real-world generalization.
-* The test set contains 300 images, but the samples are still derived from limited data sources.
+* The test set contains 750 images, but the samples are still derived from limited data sources.
 * Ship and sea images come from different data sources, so source-related bias may still exist.
 * The model may learn source-related differences in addition to ship-sea features.
 * More diverse SAR images from different regions, seasons, incidence angles, and sea states are needed.
@@ -331,4 +331,4 @@ Current completed stages:
 * Test evaluation
 * GitHub integration
 
-This repository currently represents a working prototype for SAR-based ship-sea classification using a 2000-image balanced dataset.
+This repository currently represents a working prototype for SAR-based ship-sea classification using a 5000-image balanced dataset.
