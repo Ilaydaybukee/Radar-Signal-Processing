@@ -240,7 +240,7 @@ The output classes are:
 
 ## Current Results
 
-The first prototype achieved:
+The expanded prototype achieved:
 
 | Metric              | Result |
 | ------------------- | -----: |
@@ -266,6 +266,28 @@ The confusion matrix on the test set is shown below:
 
 ![Confusion Matrix](outputs/confusion_matrix.png)
 
+
+### Latest Expanded Dataset Run
+
+The dataset was expanded from the initial 100-image prototype to a balanced 2000-image dataset.
+
+| Class | Number of Images |
+|---|---:|
+| Ship | 1000 |
+| Sea | 1000 |
+| Total | 2000 |
+
+The processed dataset split is:
+
+| Split | Ship | Sea | Total |
+|---|---:|---:|---:|
+| Train | 700 | 700 | 1400 |
+| Validation | 150 | 150 | 300 |
+| Test | 150 | 150 | 300 |
+
+The CNN model was retrained using the expanded dataset and achieved 100% accuracy on the 300-image test set.
+
+> Note: Since ship images are selected from OpenSARShip and sea patches are generated from Sentinel-1 open-sea regions, the results should still be interpreted carefully with respect to possible source-domain differences.
 
 ## Limitations
 
