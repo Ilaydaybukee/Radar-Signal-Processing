@@ -40,9 +40,9 @@ The dataset is split as:
 
 | Split      | Ship | Sea | Total |
 | ---------- | ---: | --: | ----: |
-| Train      |  700 | 700 |  3500 |
-| Validation |  150 | 150 |   750 |
-| Test       |  150 | 150 |   750 |
+| Train      | 1750 | 1750 | 3500 |
+| Validation |  375 |  375 |  750 |
+| Test       |  375 |  375 |  750 |
 
 ### Data Sources
 
@@ -281,9 +281,9 @@ The processed dataset split is:
 
 | Split | Ship | Sea | Total |
 |---|---:|---:|---:|
-| Train | 700 | 700 | 3500 |
-| Validation | 150 | 150 | 750 |
-| Test | 150 | 150 | 750 |
+| Train | 1750 | 1750 | 3500 |
+| Validation | 375 | 375 | 750 |
+| Test | 375 | 375 | 750 |
 
 The CNN model was retrained using the expanded dataset and achieved 100% accuracy on the 750-image test set.
 
