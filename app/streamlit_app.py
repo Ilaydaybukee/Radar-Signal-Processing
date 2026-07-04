@@ -10,6 +10,7 @@ import csv
 from io import BytesIO, StringIO
 import sys
 
+import requests
 import streamlit as st
 import torch
 from PIL import Image, ImageFilter, ImageEnhance
@@ -31,12 +32,12 @@ CLASS_NAMES = {
 
 
 DATASET_INFO = {
-    "Total images": "2000",
-    "Ship images": "1000",
-    "Sea images": "1000",
-    "Train split": "1400 images",
-    "Validation split": "300 images",
-    "Test split": "300 images",
+    "Total images": "5000",
+    "Ship images": "2500",
+    "Sea images": "2500",
+    "Train split": "3500 images",
+    "Validation split": "750 images",
+    "Test split": "750 images",
     "Model": "Simple CNN",
     "Input size": "1 × 256 × 256 grayscale SAR patch",
 }
@@ -45,6 +46,99 @@ DATASET_INFO = {
 def get_device() -> torch.device:
     """Use CUDA if available, otherwise CPU."""
     return torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+
+def get_supabase_config() -> tuple[str, str]:
+    """Read Supabase credentials from Streamlit secrets."""
+    supabase_url = st.secrets.get("SUPABASE_URL", "")
+    supabase_key = st.secrets.get("SUPABASE_ANON_KEY", "")
+    return supabase_url.rstrip("/"), supabase_key
+
+
+def supabase_is_configured() -> bool:
+    """Check if Supabase credentials are available."""
+    supabase_url, supabase_key = get_supabase_config()
+    return bool(supabase_url and supabase_key)
+
+
+def get_supabase_headers() -> dict:
+    """Create headers for Supabase REST API requests."""
+    _, supabase_key = get_supabase_config()
+
+    return {
+        "apikey": supabase_key,
+        "Authorization": f"Bearer {supabase_key}",
+        "Content-Type": "application/json",
+    }
+
+
+def save_prediction_history(results: list[dict]) -> tuple[bool, str]:
+    """Save prediction results to Supabase."""
+    if not supabase_is_configured():
+        return False, "Supabase secrets are not configured."
+
+    supabase_url, _ = get_supabase_config()
+    endpoint = f"{supabase_url}/rest/v1/prediction_history"
+
+    rows = []
+
+    for result in results:
+        rows.append(
+            {
+                "image_name": result["Image"],
+                "prediction": result["Prediction"],
+                "decision": result["Decision"],
+                "confidence": result["Confidence (%)"],
+                "sea_probability": result["Sea Probability (%)"],
+                "ship_probability": result["Ship Probability (%)"],
+            }
+        )
+
+    try:
+        response = requests.post(
+            endpoint,
+            headers={
+                **get_supabase_headers(),
+                "Prefer": "return=minimal",
+            },
+            json=rows,
+            timeout=20,
+        )
+
+        if response.status_code in [200, 201, 204]:
+            return True, f"Saved {len(rows)} prediction result(s) to history."
+
+        return False, f"Supabase error {response.status_code}: {response.text}"
+
+    except requests.RequestException as error:
+        return False, f"Request error: {error}"
+
+
+def fetch_prediction_history(limit: int = 100) -> tuple[bool, list[dict] | str]:
+    """Fetch prediction history from Supabase."""
+    if not supabase_is_configured():
+        return False, "Supabase secrets are not configured."
+
+    supabase_url, _ = get_supabase_config()
+    endpoint = (
+        f"{supabase_url}/rest/v1/prediction_history"
+        f"?select=*&order=created_at.desc&limit={limit}"
+    )
+
+    try:
+        response = requests.get(
+            endpoint,
+            headers=get_supabase_headers(),
+            timeout=20,
+        )
+
+        if response.status_code == 200:
+            return True, response.json()
+
+        return False, f"Supabase error {response.status_code}: {response.text}"
+
+    except requests.RequestException as error:
+        return False, f"Request error: {error}"
 
 
 @st.cache_resource
@@ -98,7 +192,7 @@ def predict(image: Image.Image) -> tuple[str, float, list[float]]:
 
 
 def results_to_csv(results: list[dict]) -> str:
-    """Convert prediction results to CSV text."""
+    """Convert results to CSV text."""
     if not results:
         return ""
 
@@ -143,6 +237,12 @@ def render_sidebar() -> None:
     st.sidebar.subheader("Dataset")
     for key, value in DATASET_INFO.items():
         st.sidebar.write(f"**{key}:** {value}")
+
+    st.sidebar.subheader("History")
+    if supabase_is_configured():
+        st.sidebar.success("Supabase history is connected.")
+    else:
+        st.sidebar.warning("Supabase history is not configured.")
 
     st.sidebar.subheader("Important Note")
     st.sidebar.info(
@@ -207,12 +307,24 @@ def render_classification_tab() -> None:
 
     csv_text = results_to_csv(results)
 
-    st.download_button(
-        label="⬇️ Download prediction results as CSV",
-        data=csv_text,
-        file_name="sar_ship_sea_predictions.csv",
-        mime="text/csv",
-    )
+    col1, col2 = st.columns([1, 1])
+
+    with col1:
+        st.download_button(
+            label="⬇️ Download prediction results as CSV",
+            data=csv_text,
+            file_name="sar_ship_sea_predictions.csv",
+            mime="text/csv",
+        )
+
+    with col2:
+        if st.button("💾 Save prediction results to history"):
+            success, message = save_prediction_history(results)
+
+            if success:
+                st.success(message)
+            else:
+                st.error(message)
 
     st.subheader("Image Preview and Individual Results")
 
@@ -309,6 +421,55 @@ def render_processing_tab() -> None:
     )
 
 
+def render_history_tab() -> None:
+    """Render saved prediction history."""
+    st.header("📜 Prediction History")
+
+    st.write(
+        "This tab shows saved prediction results. Uploaded images are not stored, "
+        "only metadata and prediction outputs are saved."
+    )
+
+    if not supabase_is_configured():
+        st.error(
+            "Supabase secrets are not configured. Add SUPABASE_URL and "
+            "SUPABASE_ANON_KEY in Streamlit Cloud Secrets."
+        )
+        return
+
+    limit = st.slider(
+        "Number of recent records to show",
+        min_value=10,
+        max_value=500,
+        value=100,
+        step=10,
+    )
+
+    if st.button("🔄 Refresh history"):
+        st.cache_data.clear()
+
+    success, data = fetch_prediction_history(limit=limit)
+
+    if not success:
+        st.error(data)
+        return
+
+    if not data:
+        st.info("No saved prediction history yet.")
+        return
+
+    st.dataframe(data, use_container_width=True)
+
+    csv_text = results_to_csv(data)
+
+    st.download_button(
+        label="⬇️ Download history as CSV",
+        data=csv_text,
+        file_name="sar_prediction_history.csv",
+        mime="text/csv",
+    )
+
+
 def render_about_tab() -> None:
     """Render project explanation and limitations."""
     st.header("ℹ️ About This Demo")
@@ -327,6 +488,7 @@ def render_about_tab() -> None:
         "- Batch SAR ship-sea classification\n"
         "- Confidence score visualization\n"
         "- CSV export of prediction results\n"
+        "- Optional Supabase prediction history\n"
         "- Basic speckle/blur processing filters\n"
         "- Downloadable processed images"
     )
@@ -336,7 +498,8 @@ def render_about_tab() -> None:
         "- The model is trained on a controlled prototype dataset.\n"
         "- Ship images and sea patches come from different SAR data sources.\n"
         "- Large Sentinel-1 tiles should be converted into 256×256 patches before classification.\n"
-        "- Model-based despeckling/deblurring requires a separate trained restoration model."
+        "- Model-based despeckling/deblurring requires a separate trained restoration model.\n"
+        "- Saved history stores prediction metadata, not uploaded images."
     )
 
 
@@ -351,7 +514,7 @@ def main() -> None:
     render_sidebar()
 
     st.title("📡 SAR Image Processing Platform")
-    st.caption("Ship-Sea Classification | Speckle / Blur Processing | Prototype Demo")
+    st.caption("Ship-Sea Classification | Speckle / Blur Processing | Prediction History")
 
     if not MODEL_PATH.exists():
         st.error(
@@ -359,10 +522,11 @@ def main() -> None:
         )
         st.stop()
 
-    classification_tab, processing_tab, about_tab = st.tabs(
+    classification_tab, processing_tab, history_tab, about_tab = st.tabs(
         [
             "🚢 Classification",
             "✨ Speckle / Blur Processing",
+            "📜 History",
             "ℹ️ About",
         ]
     )
@@ -372,6 +536,9 @@ def main() -> None:
 
     with processing_tab:
         render_processing_tab()
+
+    with history_tab:
+        render_history_tab()
 
     with about_tab:
         render_about_tab()

@@ -7,3 +7,4 @@ torch
 torchvision
 streamlit
 pyyaml
+requests
