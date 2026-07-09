@@ -42,3 +42,12 @@ Thumbs.db
 # Jupyter
 .ipynb_checkpoints/
 .streamlit/
+data/raw/
+data/processed/
+raw_scenes/
+candidate_patches/
+final_datasets/
+drive_upload/
+*.zip
+*.tif
+*.tiff
