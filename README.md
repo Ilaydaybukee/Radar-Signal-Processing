@@ -332,3 +332,49 @@ Current completed stages:
 * GitHub integration
 
 This repository currently represents a working prototype for SAR-based ship-sea classification using a 5000-image balanced dataset.
+
+---
+
+## Multi-Frequency SAR Band Demo
+
+This repository now includes a quick multi-frequency SAR validation demo using three radar frequency bands:
+
+| Class | SAR Band | Source |
+|---|---|---|
+| C_band | C-band | Sentinel-1 |
+| S_band | S-band | NovaSAR / NASTaR |
+| L_band | L-band | ALOS PALSAR |
+
+The goal of this demo is **not final ship/sea classification**.  
+It is a fast validation experiment showing that C-band, S-band, and L-band SAR image patches can be collected into one pipeline and separated by a lightweight CNN.
+
+### Demo Dataset
+
+- 593 images per band
+- 3 classes
+- 1779 total images
+- Balanced C/S/L-band dataset
+
+### Demo Result
+
+- Correct test predictions: 256 / 267
+- Approximate test accuracy: 95.88%
+
+### Result Figures
+
+#### Sample Grid
+
+![Multi-frequency sample grid](docs/assets/multifrequency_demo/sample_grid.png)
+
+#### Training Curves
+
+![Multi-frequency training curves](docs/assets/multifrequency_demo/training_curves.png)
+
+#### Confusion Matrix
+
+![Multi-frequency confusion matrix](docs/assets/multifrequency_demo/confusion_matrix.png)
+
+Full demo documentation:
+
+[Multi-Frequency SAR Demo](docs/multifrequency_demo.md)
+
