@@ -27,30 +27,43 @@ Supported SAR bands in the current demo:
 
 The current meeting demo classifies SAR image patches into three frequency-band classes:
 
-```text
-C_band
-S_band
-L_band
+- `C_band`
+- `S_band`
+- `L_band`
+
+This experiment shows that different SAR frequency bands can be processed within a single pipeline and separated using a lightweight CNN model.
+
+---
 
 ## Demo Summary
 
 This demo focuses on **multi-frequency SAR band classification** rather than final ship/sea classification.
 
-### Supported SAR bands
-- **C_band** — Sentinel-1
-- **S_band** — NovaSAR / NASTaR
-- **L_band** — ALOS PALSAR
+### Supported SAR Bands
 
-### Dataset size
-- **Total images:** 1779
-- **Bands:** 3
-- **Images per band:** 593
+| Class | Sensor / Dataset |
+|---|---|
+| `C_band` | Sentinel-1 |
+| `S_band` | NovaSAR / NASTaR |
+| `L_band` | ALOS PALSAR |
+
+### Dataset Size
+
+| Item | Value |
+|---|---:|
+| Number of bands | 3 |
+| Images per band | 593 |
+| Total images | 1779 |
+| Image size | 256 × 256 |
+| Image format | Grayscale PNG |
 
 ### Goal
+
 The goal of this experiment is to show that SAR image patches from different radar frequency bands can be collected into a single pipeline and classified with a lightweight CNN.
 
-### Generated result figures
-We generated **3 main result figures** for the meeting/demo:
+### Generated Result Figures
+
+We generated **3 main result figures** for the meeting demo:
 
 1. **Training Curves**
 2. **Confusion Matrix**
@@ -60,26 +73,45 @@ We generated **3 main result figures** for the meeting/demo:
 
 ## Result Figures
 
-### 1) Training Curves
-Shows training/validation loss and accuracy across epochs.
+### 1. Training Curves
+
+Shows training and validation loss/accuracy across epochs.
 
 ![Training Curves](docs/assets/multifrequency_demo/training_curves.png)
 
-### 2) Confusion Matrix
+### 2. Confusion Matrix
+
 Shows the band-level classification performance on the test set.
 
 ![Confusion Matrix](docs/assets/multifrequency_demo/confusion_matrix.png)
 
-### 3) Sample Grid
+### 3. Sample Grid
+
 Shows example SAR patches from C-band, S-band, and L-band.
 
 ![Sample Grid](docs/assets/multifrequency_demo/sample_grid.png)
 
 ---
 
+## Demo Result
+
+The trained lightweight CNN achieved the following result on the test set:
+
+| Metric | Value |
+|---|---:|
+| Correct predictions | 256 / 267 |
+| Approximate test accuracy | 95.88% |
+
+---
+
 ## Key Takeaway
 
 This demo shows that:
+
 - multi-band SAR patches can be prepared in a common pipeline,
 - a lightweight CNN can learn band-level distinctions,
-- and the repository is now ready for larger multi-frequency SAR experiments.
+- and the repository is ready for larger multi-frequency SAR experiments.
+
+Full demo documentation:
+
+[Multi-Frequency SAR Demo](docs/multifrequency_demo.md)
