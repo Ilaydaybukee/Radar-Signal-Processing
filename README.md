@@ -31,3 +31,55 @@ The current meeting demo classifies SAR image patches into three frequency-band 
 C_band
 S_band
 L_band
+
+## Demo Summary
+
+This demo focuses on **multi-frequency SAR band classification** rather than final ship/sea classification.
+
+### Supported SAR bands
+- **C_band** — Sentinel-1
+- **S_band** — NovaSAR / NASTaR
+- **L_band** — ALOS PALSAR
+
+### Dataset size
+- **Total images:** 1779
+- **Bands:** 3
+- **Images per band:** 593
+
+### Goal
+The goal of this experiment is to show that SAR image patches from different radar frequency bands can be collected into a single pipeline and classified with a lightweight CNN.
+
+### Generated result figures
+We generated **3 main result figures** for the meeting/demo:
+
+1. **Training Curves**
+2. **Confusion Matrix**
+3. **Sample Grid**
+
+---
+
+## Result Figures
+
+### 1) Training Curves
+Shows training/validation loss and accuracy across epochs.
+
+![Training Curves](docs/assets/multifrequency_demo/training_curves.png)
+
+### 2) Confusion Matrix
+Shows the band-level classification performance on the test set.
+
+![Confusion Matrix](docs/assets/multifrequency_demo/confusion_matrix.png)
+
+### 3) Sample Grid
+Shows example SAR patches from C-band, S-band, and L-band.
+
+![Sample Grid](docs/assets/multifrequency_demo/sample_grid.png)
+
+---
+
+## Key Takeaway
+
+This demo shows that:
+- multi-band SAR patches can be prepared in a common pipeline,
+- a lightweight CNN can learn band-level distinctions,
+- and the repository is now ready for larger multi-frequency SAR experiments.
