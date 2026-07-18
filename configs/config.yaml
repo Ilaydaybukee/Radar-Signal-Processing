@@ -1,0 +1,12 @@
+project_root: "C:/SAR_AYBUKE"
+image_size: 256
+batch_size: 16
+epochs: 50
+learning_rate: 0.001
+weight_decay: 0.0001
+patience: 8
+seed: 42
+num_workers: 0
+use_amp: true
+require_cuda: true
+preprocessing: raw
