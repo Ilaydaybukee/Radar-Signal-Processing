@@ -1,0 +1,53 @@
+# Data images and generated dataset artifacts
+/data/**/*.jpg
+/data/**/*.jpeg
+/data/**/*.png
+/data/**/*.tif
+/data/**/*.tiff
+/data/**/*.bmp
+/data/**/*.gif
+/data/**/*.npy
+/data/**/*.npz
+!/data/**/.gitkeep
+
+# Model checkpoints and experiment outputs
+*.pt
+*.pth
+*.ckpt
+checkpoints/
+runs/
+outputs/
+models/
+
+# Python caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+.streamlit/
+data/raw/
+data/processed/
+raw_scenes/
+candidate_patches/
+final_datasets/
+drive_upload/
+*.zip
+*.tif
+*.tiff
