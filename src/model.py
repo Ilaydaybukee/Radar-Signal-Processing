@@ -1,66 +1,43 @@
-"""Simple CNN model for Global SAR Ship-Sea Classification.
-
-Input:
-- 1-channel grayscale SAR image
-- default size: 256x256
-
-Output:
-- 2 classes:
-  0 -> sea
-  1 -> ship
-"""
-
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
+class SARClassifier(nn.Module):
+    def __init__(self, num_classes=6):
+        super(SARClassifier, self).__init__()
+        
+        # Her evrişim (Conv) katmanının arkasına BatchNorm ekledik
+        self.conv1 = nn.Conv2d(in_channels=1, out_channels=16, kernel_size=3, padding=1)
+        self.bn1 = nn.BatchNorm2d(16)
+        self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
+        
+        self.conv2 = nn.Conv2d(16, 32, kernel_size=3, padding=1)
+        self.bn2 = nn.BatchNorm2d(32)
+        
+        self.conv3 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
+        self.bn3 = nn.BatchNorm2d(64)
+        
+        self.conv4 = nn.Conv2d(64, 128, kernel_size=3, padding=1)
+        self.bn4 = nn.BatchNorm2d(128)
+        
+        self.adaptive_pool = nn.AdaptiveAvgPool2d((8, 8))
+        
+        self.fc1 = nn.Linear(128 * 8 * 8, 512)
+        self.dropout = nn.Dropout(0.5) 
+        self.fc2 = nn.Linear(512, num_classes) 
 
-class SimpleSARClassifier(nn.Module):
-    """A lightweight CNN for binary SAR image classification."""
-
-    def __init__(self, num_classes: int = 2) -> None:
-        super().__init__()
-
-        self.features = nn.Sequential(
-            # Input: [batch, 1, 256, 256]
-            nn.Conv2d(in_channels=1, out_channels=16, kernel_size=3, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2),  # [batch, 16, 128, 128]
-
-            nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2),  # [batch, 32, 64, 64]
-
-            nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2),  # [batch, 64, 32, 32]
-        )
-
-        self.classifier = nn.Sequential(
-            nn.Flatten(),
-            nn.Linear(64 * 32 * 32, 128),
-            nn.ReLU(),
-            nn.Dropout(p=0.3),
-            nn.Linear(128, num_classes),
-        )
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Run the input image through the CNN."""
-        x = self.features(x)
-        x = self.classifier(x)
+    def forward(self, x):
+        # ReLU'dan önce BatchNorm uyguluyoruz
+        x = self.pool(F.relu(self.bn1(self.conv1(x))))
+        x = self.pool(F.relu(self.bn2(self.conv2(x))))
+        x = self.pool(F.relu(self.bn3(self.conv3(x))))
+        x = self.pool(F.relu(self.bn4(self.conv4(x))))
+        
+        x = self.adaptive_pool(x)
+        x = torch.flatten(x, 1)
+        
+        x = F.relu(self.fc1(x))
+        x = self.dropout(x)
+        x = self.fc2(x)
+        
         return x
-
-
-def main() -> None:
-    """Quick model test."""
-    model = SimpleSARClassifier()
-
-    dummy_input = torch.randn(1, 1, 256, 256)
-    output = model(dummy_input)
-
-    print(model)
-    print(f"Dummy input shape: {dummy_input.shape}")
-    print(f"Output shape: {output.shape}")
-
-
-if __name__ == "__main__":
-    main()

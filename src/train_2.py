@@ -11,23 +11,26 @@ print(f"Eğitim için kullanılacak cihaz: {device}\n")
 
 BATCH_SIZE = 32
 LEARNING_RATE = 0.0001
-# Gece boyu açık kalacağı için tur sayısını 100 yaptık. 
-EPOCHS = 100  
+EPOCHS = 50  # Üzerine ekleme yaptığımız için 50 tur yeterli
 
-# YENİ KLASÖR YOLUN (İçinde 'ship' ve 'sea' klasörleri olduğundan emin ol)
-TRAIN_DIR = r"C:\Users\semih\OneDrive\Masaüstü\ilk eğitim"
-
+# 1. YENİ VERİ SETİNİN YOLU (İkinci eğitim)
+TRAIN_DIR = r"C:\Users\semih\OneDrive\Masaüstü\eğitim iki"
 train_dataset = SARDataset(folder_path=TRAIN_DIR)
-print(f"Gece Mesaisine Giren Toplam Görüntü: {len(train_dataset)}\n")
-
 train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
+print(f"İkinci Aşamaya Giren Toplam Görüntü: {len(train_dataset)}\n")
 
-# İkili (Binary) sınıflandırma (Ship ve Sea)
+# 2. MODELİ ÇAĞIR VE GECEKİ HAFIZAYI YÜKLE
 model = SARClassifier(num_classes=2).to(device)
+
+# Ağırlıkları weights klasöründen çekiyoruz
+ESKI_MODEL_YOLU = r"C:\Users\semih\OneDrive\Masaüstü\analizzz\weights\sar_ikili_gece_modeli.pth"
+model.load_state_dict(torch.load(ESKI_MODEL_YOLU))
+print("Önceki gece eğitimi başarıyla yüklendi. Üstüne inşa başlıyor!\n")
+
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
-print("Gece Boyu Sürecek Dev Eğitim Başlıyor...\n")
+# 3. YENİ EĞİTİM DÖNGÜSÜ
 for epoch in range(EPOCHS):
     model.train()
     running_loss = 0.0
@@ -51,8 +54,9 @@ for epoch in range(EPOCHS):
     train_accuracy = 100 * correct_train / total_train
     avg_train_loss = running_loss / len(train_loader)
     
-    print(f"Gece Turu [{epoch+1}/{EPOCHS}] | Loss: {avg_train_loss:.4f} | Başarı: %{train_accuracy:.2f}")
+    print(f"Part 2 Turu [{epoch+1}/{EPOCHS}] | Loss: {avg_train_loss:.4f} | Başarı: %{train_accuracy:.2f}")
 
-# Sabah uyandığında bu dosyayı hazır bulacaksın
-torch.save(model.state_dict(), "sar_ikili_gece_modeli.pth")
-print("\nSabah Oldu, Eğitim Bitti! Zeka 'sar_ikili_gece_modeli.pth' olarak kaydedildi.")
+# 4. YENİ MODELİ WEIGHTS KLASÖRÜNE KAYDET
+YENI_MODEL_YOLU = r"C:\Users\semih\OneDrive\Masaüstü\analizzz\weights\sar_ikili_ikinci_model.pth"
+torch.save(model.state_dict(), YENI_MODEL_YOLU)
+print(f"\nİkinci eğitim bitti! Yeni zeka kaydedildi: {YENI_MODEL_YOLU}")

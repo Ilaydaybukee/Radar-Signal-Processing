@@ -1,98 +1,56 @@
-"""Dataset loader for Global SAR Ship-Sea Classification.
-
-This file defines a PyTorch Dataset class that reads processed SAR images
-from folders such as:
-
-data/processed/train/ship
-data/processed/train/sea
-
-Labels:
-- sea  -> 0
-- ship -> 1
-"""
-
 from pathlib import Path
-from typing import Callable
-
-from PIL import Image
+import numpy as np
+import tifffile
 import torch
 from torch.utils.data import Dataset
+from PIL import Image
+import torchvision.transforms as transforms  # Görüntü boyutlandırmak için eklendi
 
+class SARDataset(Dataset):
+    def __init__(self, folder_path):
+        self.folder_path = Path(folder_path)
+        
+        # Hem senin TIF'leri hem de Kaggle'ın JPG/PNG'lerini bulacak
+        extensions = ["*.tif", "*.tiff", "*.jpg", "*.jpeg", "*.png"]
+        image_paths = []
+        for ext in extensions:
+            image_paths.extend(self.folder_path.rglob(ext))
+        
+        self.class_to_idx = {
+            "sea": 0,
+            "ship": 1
+        }
+        
+        self.samples = []
+        
+        for img_path in image_paths:
+            folder_name = img_path.parent.name.lower()
+            if folder_name in self.class_to_idx:
+                self.samples.append((img_path, self.class_to_idx[folder_name]))
+                
+        # --- SİHİRLİ DOKUNUŞ: Bütün resimleri 256x256 piksele sabitle ---
+        self.resize = transforms.Resize((256, 256))
 
-SUPPORTED_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".tif", ".tiff"}
-
-CLASS_TO_LABEL = {
-    "sea": 0,
-    "ship": 1,
-}
-
-
-class SARShipSeaDataset(Dataset):
-    """PyTorch Dataset for ship/sea SAR image classification."""
-
-    def __init__(
-        self,
-        split_dir: str | Path,
-        image_size: int = 256,
-        transform: Callable | None = None,
-    ) -> None:
-        self.split_dir = Path(split_dir)
-        self.image_size = image_size
-        self.transform = transform
-        self.samples: list[tuple[Path, int]] = []
-
-        self._collect_samples()
-
-    def _collect_samples(self) -> None:
-        """Collect image paths and labels from sea/ship folders."""
-        for class_name, label in CLASS_TO_LABEL.items():
-            class_dir = self.split_dir / class_name
-
-            if not class_dir.exists():
-                continue
-
-            for image_path in sorted(class_dir.iterdir()):
-                if image_path.is_file() and image_path.suffix.lower() in SUPPORTED_IMAGE_EXTENSIONS:
-                    self.samples.append((image_path, label))
-
-    def __len__(self) -> int:
-        """Return number of samples."""
+    def __len__(self):
         return len(self.samples)
 
-    def __getitem__(self, index: int) -> tuple[torch.Tensor, int]:
-        """Load one image and return image tensor with label."""
-        image_path, label = self.samples[index]
-
-        with Image.open(image_path) as image:
-            image = image.convert("L")
-            image = image.resize((self.image_size, self.image_size))
-
-            if self.transform is not None:
-                image_tensor = self.transform(image)
-            else:
-                image_tensor = self._pil_to_tensor(image)
-
-        return image_tensor, label
-
-    @staticmethod
-    def _pil_to_tensor(image: Image.Image) -> torch.Tensor:
-        """Convert grayscale PIL image to normalized tensor [1, H, W]."""
-        image_bytes = torch.ByteTensor(torch.ByteStorage.from_buffer(image.tobytes()))
-        image_tensor = image_bytes.float().view(image.height, image.width) / 255.0
-
-        return image_tensor.unsqueeze(0)
-
-
-def main() -> None:
-    """Small manual check."""
-    dataset = SARShipSeaDataset("data/processed/train")
-    print(f"Train samples found: {len(dataset)}")
-
-    if len(dataset) > 0:
-        image, label = dataset[0]
-        print(f"First image tensor shape: {image.shape}")
-        print(f"First label: {label}")
-
-
-if __name__ == "__main__":
-    main()
+    def __getitem__(self, idx):
+        img_path, label_idx = self.samples[idx]
+        
+        if img_path.suffix.lower() in ['.tif', '.tiff']:
+            image = tifffile.imread(str(img_path))
+        else:
+            image = np.array(Image.open(img_path).convert('L'))
+        
+        if len(image.shape) == 3:
+            image = image[:, :, 0]
+            
+        image = np.expand_dims(image, axis=0) 
+        image_tensor = torch.from_numpy(image).float() / 255.0 
+        
+        # --- Okunan her resim burada 256x256 boyutuna zorlanır ---
+        image_tensor = self.resize(image_tensor)
+        
+        label_tensor = torch.tensor(label_idx, dtype=torch.long)
+        
+        return image_tensor, label_tensor
