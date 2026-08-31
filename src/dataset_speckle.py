@@ -1,59 +1,56 @@
 import os
-from pathlib import Path
+import cv2
 import numpy as np
-import tifffile
 import torch
 from torch.utils.data import Dataset
-import torchvision.transforms as transforms
-from PIL import Image
+import torchvision.transforms.functional as TF
+import torchvision.transforms as T
+import random
 
 class SARDespeckleDataset(Dataset):
-    def __init__(self, noisy_dir, clean_dir, img_size=256):
-        """
-        noisy_dir: Benek gürültülü (speckle) SAR görüntülerinin olduğu klasör
-        clean_dir: Referans (hedef) temiz görüntülerin olduğu klasör
-        """
-        self.noisy_dir = Path(noisy_dir)
-        self.clean_dir = Path(clean_dir)
+    def __init__(self, noisy_dir, clean_dir):
+        self.noisy_dir = noisy_dir
+        self.clean_dir = clean_dir
         
-        # Klasördeki tüm geçerli dosyaları bul ve isme göre sırala
-        valid_ext = ('.tif', '.tiff', '.png', '.jpg', '.jpeg')
-        self.image_filenames = sorted([f for f in os.listdir(noisy_dir) if f.lower().endswith(valid_ext)])
-        
-        # Tüm görüntüleri makale standartlarına uygun sabit bir boyuta zorla
-        self.resize = transforms.Resize((img_size, img_size))
+        # Tüm uzantıları sorunsuz yakalar (.JPG, .png, .tif)
+        valid_exts = ('.jpg', '.jpeg', '.png', '.tif', '.tiff')
+        self.images = [f for f in os.listdir(noisy_dir) if f.lower().endswith(valid_exts)]
 
     def __len__(self):
-        return len(self.image_filenames)
+        return len(self.images)
 
     def __getitem__(self, idx):
-        filename = self.image_filenames[idx]
+        img_name = self.images[idx]
+        noisy_path = os.path.join(self.noisy_dir, img_name)
+        clean_path = os.path.join(self.clean_dir, img_name)
+
+        # Türkçe karakter (Masaüstü) içeren dosya yolları için güvenli okuma
+        noisy_img = cv2.imdecode(np.fromfile(noisy_path, dtype=np.uint8), cv2.IMREAD_GRAYSCALE)
+        clean_img = cv2.imdecode(np.fromfile(clean_path, dtype=np.uint8), cv2.IMREAD_GRAYSCALE)
+
+        noisy_tensor = torch.from_numpy(noisy_img).float().unsqueeze(0) / 255.0
+        clean_tensor = torch.from_numpy(clean_img).float().unsqueeze(0) / 255.0
+
+        # STRATEJİ DEĞİŞİKLİĞİ: Sıkıştırmak yerine orijinal boyuttan yama (patch) kırpıyoruz
+        # 4 GB VRAM sınırını korumak için 256x256'lık pencere koordinatları belirleniyor
+        i, j, h, w = T.RandomCrop.get_params(noisy_tensor, output_size=(256, 256))
         
-        noisy_path = self.noisy_dir / filename
-        clean_path = self.clean_dir / filename # İsimlerin birebir aynı olması şart!
+        # Matematiksel hizalamanın bozulmaması için iki resim de tam olarak aynı noktadan kesiliyor
+        noisy_tensor = TF.crop(noisy_tensor, i, j, h, w)
+        clean_tensor = TF.crop(clean_tensor, i, j, h, w)
+
+        # Dinamik Veri Çoğaltma (Augmentation)
+        if random.random() > 0.5:
+            noisy_tensor = TF.hflip(noisy_tensor)
+            clean_tensor = TF.hflip(clean_tensor)
         
-        # Görüntüleri uzantısına göre TIF veya standart formatta oku
-        if noisy_path.suffix.lower() in ['.tif', '.tiff']:
-            noisy_img = tifffile.imread(str(noisy_path))
-            clean_img = tifffile.imread(str(clean_path))
-        else:
-            noisy_img = np.array(Image.open(noisy_path).convert('L'))
-            clean_img = np.array(Image.open(clean_path).convert('L'))
-            
-        # Çok kanallı görüntüler varsa tek kanala (Grayscale) indirge
-        if len(noisy_img.shape) == 3:
-            noisy_img = noisy_img[:, :, 0]
-        if len(clean_img.shape) == 3:
-            clean_img = clean_img[:, :, 0]
-            
-        # PyTorch Tensörüne Çevir, [1, H, W] kanal formatına sok ve normalize et
-        noisy_tensor = torch.from_numpy(np.expand_dims(noisy_img, axis=0)).float() / 255.0
-        clean_tensor = torch.from_numpy(np.expand_dims(clean_img, axis=0)).float() / 255.0
+        if random.random() > 0.5:
+            noisy_tensor = TF.vflip(noisy_tensor)
+            clean_tensor = TF.vflip(clean_tensor)
         
-        # Yeniden boyutlandırma
-        noisy_tensor = self.resize(noisy_tensor)
-        clean_tensor = self.resize(clean_tensor)
-        
-        # Sadece resimleri değil, dosya adını da döndürüyoruz
-        # Bu sayede test aşamasında C, S ve L bantlarını isimlerinden ayırabileceğiz
-        return noisy_tensor, clean_tensor, filename
+        if random.random() > 0.5:
+            k = random.choice([1, 2, 3])
+            noisy_tensor = torch.rot90(noisy_tensor, k, [1, 2])
+            clean_tensor = torch.rot90(clean_tensor, k, [1, 2])
+
+        return noisy_tensor, clean_tensor, img_name
